@@ -6,6 +6,7 @@ from decimal import Decimal
 from urllib.parse import urlparse
 from pricing import plan
 from shopify_read import fetch_variant
+from identity import valid_sku
 
 def build_preview(rows, fetch=fetch_variant, allowed_domains=()):
     proposals = plan(rows, allowed_domains=allowed_domains)
@@ -13,6 +14,8 @@ def build_preview(rows, fetch=fetch_variant, allowed_domains=()):
     for item in proposals:
         try:
             variant = fetch(item["variant_id"])
+            if not valid_sku(variant.get("sku")):
+                raise ValueError("Invalid SKU requires manual review")
             if not variant["taxable"]:
                 raise ValueError("Tax treatment requires manual review")
             if variant["sku"] != item["sku"]:

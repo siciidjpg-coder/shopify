@@ -12,6 +12,23 @@ from shopify_read import fetch_variant
 VID = "gid://shopify/ProductVariant/123"
 
 class ShopifyConnectorTests(unittest.TestCase):
+    def test_client_credentials_used_without_static_token(self):
+        from unittest.mock import Mock
+        provider = Mock()
+        provider.get.return_value = "renewed-token"
+        def opener(req, timeout):
+            self.assertEqual(req.get_header("X-shopify-access-token"), "renewed-token")
+            return io.BytesIO(json.dumps({"data": {"productVariant": {"id": VID}}}).encode())
+        with patch.dict(os.environ, {"SHOPIFY_SHOP_DOMAIN": "example.myshopify.com", "SHOPIFY_CLIENT_ID": "test", "SHOPIFY_CLIENT_SECRET": "fake"}, clear=True):
+            self.assertEqual(fetch_variant(VID, opener, provider)["id"], VID)
+        provider.get.assert_called_once()
+
+    def test_host_injection_rejected_before_token_request(self):
+        for domain in ("evil@example.myshopify.com", "evil/path.myshopify.com", "evil.myshopify.com:443", "a.b.myshopify.com"):
+            with patch.dict(os.environ, {"SHOPIFY_SHOP_DOMAIN": domain}, clear=True):
+                with self.assertRaises(ValueError):
+                    fetch_variant(VID)
+
     def test_valid_read(self):
         seen = {}
         class Response:

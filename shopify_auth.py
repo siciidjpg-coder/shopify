@@ -5,24 +5,31 @@ Shopify Dev Dashboard app must be installed in the same organization as the shop
 """
 import json
 import os
+import re
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone, timedelta
+
+def shop_domain():
+    domain = os.environ["SHOPIFY_SHOP_DOMAIN"].strip().lower()
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]*\.myshopify\.com", domain):
+        raise ValueError("A valid myshopify.com shop domain is required")
+    return domain
 
 class ShopifyTokenProvider:
     def __init__(self, opener=None):
         self.opener = opener or urllib.request.urlopen
         self._token = None
+        self._identity = None
         self._expires_at = datetime.min.replace(tzinfo=timezone.utc)
 
     def get(self):
-        if self._token and datetime.now(timezone.utc) + timedelta(minutes=5) < self._expires_at:
-            return self._token
-        domain = os.environ["SHOPIFY_SHOP_DOMAIN"].strip().lower()
+        domain = shop_domain()
         client_id = os.environ["SHOPIFY_CLIENT_ID"]
         client_secret = os.environ["SHOPIFY_CLIENT_SECRET"]
-        if not domain.endswith(".myshopify.com") or "/" in domain:
-            raise ValueError("A valid myshopify.com shop domain is required")
+        identity = (domain, client_id, client_secret)
+        if self._identity == identity and self._token and datetime.now(timezone.utc) + timedelta(minutes=5) < self._expires_at:
+            return self._token
         body = urllib.parse.urlencode({
             "grant_type": "client_credentials",
             "client_id": client_id,
@@ -40,5 +47,6 @@ class ShopifyTokenProvider:
         if not token or expires_in <= 0:
             raise RuntimeError("Shopify did not issue a valid access token")
         self._token = token
+        self._identity = identity
         self._expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
         return token

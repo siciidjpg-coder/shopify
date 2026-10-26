@@ -9,6 +9,8 @@ Kauppa: https://hkigroupstore.fi
 - Tiukat hyväksyntäsäännöt: hyväksytty kilpailijaverkkotunnus, vahvistettu sama variantti, varastossa oleva tuote, verollinen EUR-hinta ja enintään 2 tuntia vanha havainto.
 - `shopify_read.py`: lukee variantin Shopify Admin API:sta ympäristömuuttujien avulla (ilman kirjoitusoikeuksia).
 - `shopify_preview.py`: varmistaa Shopifyn nykyisen SKU:n, hinnan ja verollisuuden ennen ehdotuksen hyväksymistä.
+- `shopify_auth.py`: lukuyhteys käyttää automaattisesti uusiutuvaa client credentials -tokenia, kun sovelluksen ympäristömuuttujat on asetettu. Kiinteä token on edelleen vaihtoehto vanhoille asennuksille. Tunnistusvirhe ei vaihda automaattisesti toiseen tunnukseen.
+- `identity.py`: GTIN-pituuden ja tarkistusnumeron validointi, näkymättömien SKU-merkkien hylkäys sekä tiukka varianttivertailu. GTIN-arvon `.0`-päätettä ei poisteta automaattisesti. Varianttivertailun kytkentä keruuseen odottaa oikeaa tietolähdettä.
 - Yksikkötestit ja GitHub Actions -määritys: testit noin kuuden tunnin välein. GitHubin ajojen onnistumista ei ole vielä vahvistettu.
 
 ## Ei vielä toteutettu tai varmennettu
@@ -21,6 +23,8 @@ Kauppa: https://hkigroupstore.fi
 
 ## Käyttö
 Python 3.12. Testit: `python -m unittest discover -p 'test_*.py'`.
+
+Palvelinkäytössä aseta salaisuushallinnassa `SHOPIFY_SHOP_DOMAIN`, `SHOPIFY_CLIENT_ID` ja `SHOPIFY_CLIENT_SECRET`. Tällöin `SHOPIFY_ADMIN_TOKEN` ei ole tarpeen. Älä syötä salaisuuksia komentoriville. Tokenin uusiminen, lukuyhteyden kytkentä ja tunnisteiden virhetapaukset on testattu simuloiduilla vastauksilla; tämän koodiversion palvelimelta tehtävää oikeaa lukutestiä ei vielä ole varmennettu.
 
 Read-only laskenta:
 `python pricing.py verified_competitors.csv --allowed-domain esimerkkikilpailija.fi --output proposals.json`
