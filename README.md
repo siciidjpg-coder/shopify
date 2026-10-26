@@ -1,21 +1,42 @@
 # HKI Group Store – kilpailijahintaseuranta
 
-Avoin lähdekoodirepositorio HKI Group Storen kilpailijahintaseurannalle. **Ei tuotantovalmiina.**
+**Tila: kehitys-/esikatseluversio. EI automaattista tuotantohinnoittelua.**
 
-## Turvallinen käyttöönotto
-- Ohjelma toimii oletusarvoisesti vain esikatselutilassa.
-- Vertailuun hyväksytään vain varmistetut suomalaiset kilpailijatuotteet, joiden koko, väri, pakkaus ja ALV on tarkistettu.
-- Hintaehdotus vastaa halvinta hyväksyttyä verollista kilpailijahintaa. Hinnat voivat laskea tai nousta.
-- Yli 15 % lasku merkitään sähköpostihälytyksen ehdokkaaksi (info@hkigroup.fi), mutta sähköpostia ei lähetetä tällä esikatselulla.
-- Älä lisää tähän julkiseen repositorioon Shopify API -avaimia, sähköpostitunnuksia tai asiakastietoja.
-- Julkisten kilpailijasivujen luku edellyttää käyttöehtojen ja robots.txt:n noudattamista sekä hyväksyttyjä tuotemappauksia.
+Kauppa: https://hkigroupstore.fi
+
+## Toteutetut osat
+- `pricing.py`: valitsee halvimman vahvistetun kilpailijahinnan, tekee hinnankorotus- ja alennusehdotukset sekä merkitsee yli 15 %:n laskut.
+- Tiukat hyväksyntäsäännöt: hyväksytty kilpailijaverkkotunnus, vahvistettu sama variantti, varastossa oleva tuote, verollinen EUR-hinta ja enintään 2 tuntia vanha havainto.
+- `shopify_read.py`: lukee variantin Shopify Admin API:sta ympäristömuuttujien avulla (ilman kirjoitusoikeuksia).
+- `shopify_preview.py`: varmistaa Shopifyn nykyisen SKU:n, hinnan ja verollisuuden ennen ehdotuksen hyväksymistä.
+- Yksikkötestit ja GitHub Actions -määritys: testit noin kuuden tunnin välein. GitHubin ajojen onnistumista ei ole vielä vahvistettu.
+
+## Ei vielä toteutettu tai varmennettu
+- Suomen kilpailijatuotteiden laajamittainen automaattinen löytö ja koko-/väri-/pakkaustäsmäytys.
+- Tuoreiden ja käyttöehtojen mukaisesti kerättyjen hintahavaintojen tuotantosyöte.
+- Shopify Admin API:n erillinen palvelintunnus, tuotantokirjoitukset, auditointi ja palautus.
+- Sähköpostipalvelun käyttö ja toimituksen vahvistaminen osoitteeseen info@hkigroup.fi.
+- Google Merchant Centerin tuotefeedin tarkistus sekä päästä päähän -testit.
+- Pysyvä 15 minuutin ajastus hintojen keruulle ja kirjoittamiselle.
 
 ## Käyttö
-Python 3.12. Suorita testit: `python -m unittest discover -p "test_*.py"`.
+Python 3.12. Testit: `python -m unittest discover -p 'test_*.py'`.
 
-Esikatselu: `python pricing.py verified_competitors.csv --output proposals.json`.
+Read-only laskenta:
+`python pricing.py verified_competitors.csv --allowed-domain esimerkkikilpailija.fi --output proposals.json`
 
-Lähtötiedostossa tulee olla sarakkeet: variant_id,sku,current_price,competitor,competitor_url,competitor_price,verified_same_variant,in_stock,checked_at,product_name.
+Read-only Shopify-esikatselu:
+`SHOPIFY_SHOP_DOMAIN=OMA-KAUPPA.myshopify.com SHOPIFY_ADMIN_TOKEN=... python shopify_preview.py verified_competitors.csv --allowed-domain esimerkkikilpailija.fi`
 
-## Tilanne
-Tämä GitHub-julkaisu on vain turvallinen hintalaskennan lähtöversio, ei automaattinen hintojen muuttaja. Kilpailijahintojen automaattinen keruu, Shopify-kirjoitukset, sähköpostilähetykset ja Merchant Center -varmennus vaativat erilliset päästä päähän -testit ennen tuotantoa.
+Älä laita tokenia komennon historiaan tai julkiseen repositorioon: käytä salattuja ympäristömuuttujia. `verified_competitors.csv` tarvitsee sarakkeet: variant_id,sku,current_price,competitor,competitor_url,competitor_price,verified_same_variant,verified_vat_included,currency,in_stock,checked_at,product_name.
+
+**Huomio:** Koodi ei vielä itsessään varmista tuotteen EAN-/GTIN-täsmäävyyttä eikä suomalaisuutta. `verified_same_variant` ja hyväksyttyjen verkkotunnusten lista ovat erillisen luotettavan tarkistusprosessin vastuulla. Niitä ei pidä automaattisesti asettaa arvoon true pelkän nimen tai verkkotunnuksen perusteella.
+
+## Julkaisuportit
+1. Toimiva ja sallittu kilpailijahintojen tuotantosyöte sekä todistetusti täsmäävät variantit.
+2. Shopify Admin API -tunnuksen turvallinen asetushallinta ja lukutesti.
+3. Hintakirjoitusten, rollbackin, auditoinnin ja sähköpostin turvallinen testaaminen.
+4. Merchant Center -synkronoinnin varmistus.
+5. Erillinen käyttäjän hyväksyntä ennen oikeita automaattisia hintamuutoksia tai maksullisia palveluita.
+
+Ei säilytetä API-avaimia, salasanoja, tilausdataa tai asiakastietoja tässä julkisessa repositoriossa.
