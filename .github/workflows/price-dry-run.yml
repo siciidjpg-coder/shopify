@@ -1,10 +1,16 @@
-name: HKI pricing read-only tests
+name: HKI pricing read-only CI
 on:
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
   schedule:
     - cron: '17 */6 * * *'
 permissions:
   contents: read
+concurrency:
+  group: pricing-readonly-ci
+  cancel-in-progress: false
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -14,5 +20,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Run read-only tests
-        run: python -m unittest discover -p 'test_*.py'
+      - name: Compile sources
+        run: python -m compileall -q pricing.py shopify_read.py shopify_preview.py
+      - name: Run read-only unit tests
+        run: python -m unittest discover -v -p 'test_*.py'
