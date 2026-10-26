@@ -2,6 +2,10 @@
 
 **Tila: kehitys-/esikatseluversio. EI automaattista tuotantohinnoittelua.**
 
+**Nykyinen käyttöpäätös:** kehitys ja testaus tehdään paikallisesti ilman maksullisia palveluita. Render-julkaisu on peruttu; palvelua ei luotu. `render.yaml` on vain käyttämätön vaihtoehtoinen määritys, eikä sitä pidä ottaa käyttöön ilman uutta lupaa.
+
+`comparison.py` tarkistaa valmistajan viitetunnisteita ja estää vertailun hyväksymisen, jos lähteitä puuttuu, havainto on vanhentunut tai variantti/verollinen hinta on varmentamatta. Viivakoodin korjaustarve raportoidaan ehdokkaana; kaupan koodeja ei muuteta. 46 paikallista testiä läpäisty. Paikallinen testaus ei edellytä Renderiä, sähköpostipalvelua tai Shopify-kirjoituksia.
+
 Uusin testattu havaintopilotti ja sen rajat: [PILOT_STATUS.md](PILOT_STATUS.md).
 Kilpailijahavaintojen keruu: `python monitor.py`. Tämä lukee kaksi hyväksytyn host-listan tuotesivua, tarkistaa robots.txt:n ja tallentaa havainnot `output/observations.json`-tiedostoon. Tuloksia ei syötetä automaattisesti hinnankirjoitukseen. Valinnainen `--catalog /polku/shopify-sample.json` etsii SKU-ehdokkaat aiemmasta Shopify-otoksesta; otoksen hinnat eivät ole reaaliaikainen varmennus.
 

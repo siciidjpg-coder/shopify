@@ -7,6 +7,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 from collector import collect
 from identity import valid_sku
+from comparison import identifier_review, review
 
 
 def run(sources, catalog=None, collect_fn=collect):
@@ -29,10 +30,13 @@ def run(sources, catalog=None, collect_fn=collect):
                                "snapshot_price_eur": own["price"],
                                "observations": matches,
                                "status": "CANDIDATE_ONLY_NOT_APPROVED"})
+    expected = {s["url"] for s in sources}
     return {"mode": "OBSERVATION_ONLY", "shopify_writes": 0,
             "checked_at": datetime.now(timezone.utc).isoformat(),
             "catalog_variants_inspected": len(variants), "candidates": candidates,
-            "observations": observations, "errors": errors, "approved_proposals": []}
+            "observations": observations, "errors": errors, "approved_proposals": [],
+            "comparison_reviews": [review(c, expected, errors) for c in candidates],
+            "identifier_reviews": [{"variant_id": v["id"], **identifier_review(v)} for v in variants]}
 
 
 def main():

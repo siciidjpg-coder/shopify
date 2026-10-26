@@ -1,5 +1,7 @@
 # Havainnointipilotti, 26.10.2026
 
+Päivitys: käyttäjä valitsi paikallisen testauksen ilman Renderiä ja ilman maksullisia testipalveluita. Renderin luonti pysähtyi maksutietovaatimukseen eikä palvelua syntynyt. Aiempi maksullisen pilotin hyväksyntä ei ole enää voimassa. Uusi vertailun tarkistus ja valmistajatunnisteiden arviointi kasvattivat paikallisen testimäärän 46:een; alla oleva 40 testin tulos kuvaa aiempaa versiota.
+
 Tämä versio kerää kilpailijahavaintoja. Se ei kirjoita Shopifyhin eikä lähetä sähköpostia.
 
 ## Oikealla datalla testattu
