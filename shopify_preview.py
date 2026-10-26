@@ -1,14 +1,15 @@
-"""Validate source prices against live Shopify variants; never writes prices."""
+"""Validate price proposals against live Shopify variants; never writes prices."""
 import argparse
 import csv
 import json
+from decimal import Decimal
+from urllib.parse import urlparse
 from pricing import plan
 from shopify_read import fetch_variant
 
-def build_preview(rows, fetch=fetch_variant):
-    proposals = plan(rows)
-    accepted = []
-    errors = []
+def build_preview(rows, fetch=fetch_variant, allowed_domains=()):
+    proposals = plan(rows, allowed_domains=allowed_domains)
+    accepted, errors = [], []
     for item in proposals:
         try:
             variant = fetch(item["variant_id"])
@@ -16,7 +17,7 @@ def build_preview(rows, fetch=fetch_variant):
                 raise ValueError("Tax treatment requires manual review")
             if variant["sku"] != item["sku"]:
                 raise ValueError("SKU mismatch")
-            if f'{float(variant["price"]):.2f}' != item["old_price_eur"]:
+            if Decimal(str(variant["price"])) != Decimal(item["old_price_eur"]):
                 raise ValueError("Shopify price changed since competitor snapshot")
             accepted.append(item)
         except Exception as exc:
@@ -26,11 +27,12 @@ def build_preview(rows, fetch=fetch_variant):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("csv_file")
+    parser.add_argument("--allowed-domain", action="append", required=True)
     parser.add_argument("--output", default="shopify-preview.json")
     args = parser.parse_args()
     with open(args.csv_file, newline="", encoding="utf-8-sig") as f:
         rows = list(csv.DictReader(f))
-    result = build_preview(rows)
+    result = build_preview(rows, allowed_domains=args.allowed_domain)
     with open(args.output,"w",encoding="utf-8") as f:
         json.dump(result,f,ensure_ascii=False,indent=2)
     print(f'{len(result["proposals"])} verified, {len(result["rejected"])} rejected, NO SHOPIFY WRITES')
