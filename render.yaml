@@ -1,0 +1,16 @@
+# Observation pilot only. Creation requires the user's paid-service approval.
+services:
+  - type: cron
+    name: hki-price-monitor-observations
+    runtime: python
+    region: frankfurt
+    plan: 0.5c-512mb
+    schedule: "*/15 * * * *"
+    buildCommand: python -m unittest discover -p 'test_*.py'
+    startCommand: timeout 180 python -u monitor.py
+    autoDeployTrigger: "off"
+    envVars:
+      - key: ENABLE_PRICE_WRITES
+        value: "false"
+      - key: MONITOR_PAUSED
+        value: "false"

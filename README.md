@@ -2,6 +2,9 @@
 
 **Tila: kehitys-/esikatseluversio. EI automaattista tuotantohinnoittelua.**
 
+Uusin testattu havaintopilotti ja sen rajat: [PILOT_STATUS.md](PILOT_STATUS.md).
+Kilpailijahavaintojen keruu: `python monitor.py`. Tämä lukee kaksi hyväksytyn host-listan tuotesivua, tarkistaa robots.txt:n ja tallentaa havainnot `output/observations.json`-tiedostoon. Tuloksia ei syötetä automaattisesti hinnankirjoitukseen. Valinnainen `--catalog /polku/shopify-sample.json` etsii SKU-ehdokkaat aiemmasta Shopify-otoksesta; otoksen hinnat eivät ole reaaliaikainen varmennus.
+
 Kauppa: https://hkigroupstore.fi
 
 ## Toteutetut osat

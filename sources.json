@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Turun Turvavaruste Oy",
+    "host": "www.turunturvavaruste.fi",
+    "url": "https://www.turunturvavaruste.fi/tuote/elintarviketeollisuusmallisto/",
+    "terms_url": "https://www.turunturvavaruste.fi/tilausehdot/",
+    "mode": "observation_only"
+  },
+  {
+    "name": "Suojaintukku.fi",
+    "host": "www.suojaintukku.fi",
+    "url": "https://www.suojaintukku.fi/portwest-2201-elintarvikehyvaksytty-haalari/",
+    "terms_url": "https://www.suojaintukku.fi/verkkokaupan-ehdot/",
+    "mode": "observation_only"
+  }
+]
